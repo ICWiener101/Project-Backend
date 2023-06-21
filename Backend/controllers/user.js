@@ -38,7 +38,9 @@ function generateToken(user) {
             userId: user._id.toString(),
       };
 
-      return jwt.sign(payload, process.env.ACCESS_TOKEN_SECRET);
+      return jwt.sign(payload, process.env.ACCESS_TOKEN_SECRET, {
+            expiresIn: '1d',
+      });
 }
 
 module.exports = { register, login, generateToken };

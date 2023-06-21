@@ -1,4 +1,4 @@
-const { getOneBook } = require('../services/bookService');
+const { getOneBook } = require('../controllers/book');
 async function isOwner(req, res, next) {
       const { bookId } = req.params;
       const { userId } = req.auth;

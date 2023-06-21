@@ -7,18 +7,16 @@ const MIME_TYPES = {
       'image/png': 'png',
 };
 
-const storage = multer.diskStorage({
-      destination: (req, file, callback) => {
-            callback(null, 'images');
-      },
-      filename: (req, file, callback) => {
-            const name = file.originalname.split('-').join('_').split('.')[0];
-            const extension = MIME_TYPES[file.mimetype];
-            callback(null, name + Date.now() + '.' + extension);
-      },
-});
+const storage = multer.memoryStorage();
+const filter = (req, file, callback) => {
+      if (file.mimetype.split('/')[0] === 'image') {
+            callback(null, true);
+      } else {
+            callback(new Error('Only images allowed'));
+      }
+};
 
-const upload = multer({ storage: storage }).single('image');
+const upload = multer({ storage: storage, fileFilter: filter }).single('image');
 
 const resizeImage = async (req, res, next) => {
       if (!req.file) {
@@ -26,15 +24,15 @@ const resizeImage = async (req, res, next) => {
       }
 
       try {
-            const imagePath = req.file.path;
-            const resizedImagePath = imagePath.replace(/\.\w+$/, '.webP');
-            await sharp(imagePath)
+            const imagePath = req.file.buffer;
+            const name = req.file.originalname.split('.')[0];
+            const sharpFile = await sharp(imagePath)
                   .resize(206, 260, { fill: 'contain' })
-                  .toFile(resizedImagePath);
+                  .webp({ quality: 100 })
+                  .toFile(`images/${name}.webp`);
 
-            req.file.path = resizedImagePath.split('\\')[1];
             console.log('Uploaded file:', req.file);
-            console.log('Resized file:', req.file.path);
+            console.log('Resized file:', sharpFile);
       } catch (error) {
             // Handle any errors that occur during image resizing
             console.error('Image resizing error:', error);
@@ -47,3 +45,11 @@ module.exports = {
       upload,
       resizeImage,
 };
+// destination: (req, file, callback) => {
+//       callback(null, 'images');
+// },
+// filename: (req, file, callback) => {
+//       const name = file.originalname.split('-').join('_').split('.')[0];
+//       const extension = MIME_TYPES[file.mimetype];
+//       callback(null, name + Date.now() + '.' + extension);
+// },
