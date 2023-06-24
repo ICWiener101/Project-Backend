@@ -30,11 +30,7 @@ const resizeImage = async (req, res, next) => {
                   .resize(206, 260, { fill: 'contain' })
                   .webp({ quality: 100 })
                   .toFile(`images/${name}.webp`);
-
-            console.log('Uploaded file:', req.file);
-            console.log('Resized file:', sharpFile);
       } catch (error) {
-            // Handle any errors that occur during image resizing
             console.error('Image resizing error:', error);
       }
 
@@ -45,11 +41,3 @@ module.exports = {
       upload,
       resizeImage,
 };
-// destination: (req, file, callback) => {
-//       callback(null, 'images');
-// },
-// filename: (req, file, callback) => {
-//       const name = file.originalname.split('-').join('_').split('.')[0];
-//       const extension = MIME_TYPES[file.mimetype];
-//       callback(null, name + Date.now() + '.' + extension);
-// },
