@@ -22,6 +22,7 @@
 .Header ul li {
     padding-inline: 20px;
     list-style-type: none;
+    cursor: pointer;
 }
 
 .Header ul li a {

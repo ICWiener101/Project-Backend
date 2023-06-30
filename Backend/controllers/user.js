@@ -9,6 +9,9 @@ async function register(req, res) {
             email: new RegExp(`^${email}$`, 'i'),
       });
       try {
+            if(existing) {
+                  return res.status(400).json({ message: 'Email already exists'})
+            }
             const hashedPassword = await bcrypt.hash(password, 10);
             const user = new User({
                   email,
@@ -18,7 +21,7 @@ async function register(req, res) {
             await user.save();
             return res.status(201).json(user);
       } catch (error) {
-            res.status(500).json(error.message);
+            res.status(500).json({message: "Error registering user"});
       }
 }
 

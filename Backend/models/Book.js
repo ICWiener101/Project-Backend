@@ -24,14 +24,14 @@ const bookSchema = new Schema({
 
 bookSchema.path('title').validate(
       function (value) {
-            return value.length <= 20;
+            return value.length <= 100;
       },
       { message: 'Title must not exceed 100 characters.' }
 );
 
 bookSchema.path('year').validate(function (value) {
       const currentYear = new Date().getFullYear();
-      return value >= 1800 && value <= currentYear;
+      return value <= currentYear;
 }, 'Invalid year.');
 
 const Book = model('Book', bookSchema);

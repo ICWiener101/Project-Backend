@@ -27,7 +27,7 @@ router.put(
       resizeImage,
       updateBook
 );
-router.post('/:id/rating', authenticateToken, rateBook);
+router.post('/:bookId/rating', authenticateToken, rateBook);
 router.delete('/:bookId', authenticateToken, isOwner, deleteBook);
 
 module.exports = router;

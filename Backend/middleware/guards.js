@@ -1,10 +1,12 @@
-const { getOneBook } = require('../controllers/book');
+const Book = require('../models/Book');
+
 async function isOwner(req, res, next) {
       const { bookId } = req.params;
       const { userId } = req.auth;
 
       try {
-            const book = await getOneBook(bookId);
+            const book = await Book.findOne({_id: bookId});
+
 
             if (!book) {
                   return res.status(404).json({ message: 'Book not found' });

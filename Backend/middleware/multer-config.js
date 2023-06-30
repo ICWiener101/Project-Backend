@@ -1,12 +1,6 @@
 const multer = require('multer');
 const sharp = require('sharp');
 
-const MIME_TYPES = {
-      'image/jpg': 'jpg',
-      'image/jpeg': 'jpg',
-      'image/png': 'png',
-};
-
 const storage = multer.memoryStorage();
 const filter = (req, file, callback) => {
       if (file.mimetype.split('/')[0] === 'image') {
@@ -27,11 +21,11 @@ const resizeImage = async (req, res, next) => {
             const imagePath = req.file.buffer;
             const name = req.file.originalname.split('.')[0];
             const sharpFile = await sharp(imagePath)
-                  .resize(206, 260, { fill: 'contain' })
+                  .resize({ width: 206, height: 260, fit: sharp.fit.fill })
                   .webp({ quality: 100 })
                   .toFile(`images/${name}.webp`);
       } catch (error) {
-            console.error('Image resizing error:', error);
+            return res.status(500).json({ message: 'Image resizing error' });
       }
 
       next();

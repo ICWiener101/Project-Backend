@@ -7,7 +7,6 @@ const userSchema = new Schema({
             unique: true,
             validate: {
                   validator: (value) => {
-                        // Use a regular expression to validate the email format
                         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
                         return emailRegex.test(value);
                   },

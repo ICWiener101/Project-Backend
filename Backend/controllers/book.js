@@ -11,32 +11,37 @@ async function getAllBooks(req, res) {
 
 async function getOneBook(req, res) {
       const id = req.params.bookId;
-      if (!id) {
-            return res.status(404).json({ message: 'Book not found' });
-      }
+
       try {
             const book = await Book.findOne({ _id: id });
-
+            if (!book) {
+                  return res.status(404).json({ message: 'Book not found' });
+            }
             return res.status(200).json(book);
       } catch (error) {
-            return res.status(400).json({ error: error });
+            return res.status(404).json({ error: error });
       }
 }
 async function addNewBook(req, res) {
       try {
             const book = JSON.parse(req.body.book);
+            // Generating the image path based on the original file name
             const imagePath =
                   req.file.originalname.split('.')[0] + '.' + 'webp';
+            // Retrieving the userId from the authenticated request
             const userId = req.auth.userId;
+            // Deleting unnecessary properties from the book object
             delete book._id;
             delete book.ratings._id;
             delete book.ratings.userId;
             delete book.userId;
+            // Creating a new Book instance with the modified book object and other necessary properties
             const newBook = new Book({
                   ...book,
                   userId: userId,
                   imageUrl: `http://localhost:4000/books/images/${imagePath}`,
             });
+
             await newBook.save();
             return res.status(201).json({ newBook });
       } catch (error) {
@@ -45,60 +50,75 @@ async function addNewBook(req, res) {
 }
 
 async function updateBook(req, res) {
-      const id = req.params.bookId;
-      if (!id) {
+      const { bookId } = req.params;
+      // Check if the bookId parameter is provided
+      if (!bookId) {
             return res.status(404).json({ message: 'Book not found' });
       }
 
       try {
-            const book = await getOneBook(id);
-            const imagePath =
-                  req.file.originalname.split('.')[0] + '.' + 'webp';
+            // Find the book in the database based on the bookId
+            const book = await Book.findOne({ _id: bookId });
             let imageUrl = book.imageUrl;
+            // Check if a new image file is uploaded
             if (req.file) {
+                  const imagePath =
+                        req.file.originalname.split('.')[0] + '.' + 'webp';
                   imageUrl = `http://localhost:4000/books/images/${imagePath}`;
             }
-            const { title, author, year, genre, ratings, averageRating } =
-                  req.file ? JSON.parse(req.body.book) : req.body;
+            // Extract the book details from the request body
+            const { title, author, year, genre } = req.body;
             const bookUpdate = {
                   title,
                   author,
                   year,
                   genre,
-                  ratings,
-                  averageRating,
             };
+            // Update the imageUrl field if a new image is uploaded
             if (imageUrl) {
                   bookUpdate.imageUrl = imageUrl;
             }
-            const updatedBook = await Book.findByIdAndUpdate(id, bookUpdate, {
-                  new: true,
-            });
+            // Update and retrieve the updated book document
+            const updatedBook = await Book.findByIdAndUpdate(
+                  bookId,
+                  bookUpdate,
+                  {
+                        new: true,
+                  }
+            );
+            // Check if the book document was not found
             if (!updatedBook) {
                   return res.status(404).json({ error: 'Book not found' });
             }
-
-            return res.status(200).json({ updatedBook });
+            // Return the updated book document as the response
+            return res.status(200).json(updatedBook);
       } catch (error) {
-            res.status(400).json({ error: error });
+            // Handle any errors that occurred during the update process
+            res.status(500).json({ error: error });
       }
 }
 
 async function bestRatedBooks(req, res) {
       try {
             const books = await Book.find({});
+            //Create an empty array to store the top-rated books
             const topBooks = [];
+            // Create a set to keep track of visited books by their title
             const visitedBooks = new Set();
             2;
+            // Sort the books in descending order based on averageRating
             const bestBooks = books.sort(function (a, b) {
                   return b.averageRating - a.averageRating;
             });
+
+            // Iterate through the sorted books and add them to the topBooks array
             for (const book of bestBooks) {
+                  // Check if the book has not been visited yet
                   if (!visitedBooks.has(book.title)) {
                         topBooks.push(book);
                         visitedBooks.add(book.title);
                   }
-
+                  // Break the loop if the desired number of top books has been reached
                   if (topBooks.length === 3) {
                         break;
                   }
@@ -108,15 +128,29 @@ async function bestRatedBooks(req, res) {
       } catch (error) {
             res.status(400).json({ error: error });
       }
+      //server sorting version
+      // try {
+      //       const topBooks = await Book.find({})
+      //             .sort({ averageRating: -1 })
+      //             .limit(3);
+
+      //       return res.status(200).json(topBooks);
+      // } catch (error) {
+      //       res.status(400).json({ error: error });
+      // }
 }
 
 async function deleteBook(req, res) {
+      // Extract the bookId from the request parameters
       const id = req.params.bookId;
+      // Check if bookId is missing
       if (!id) {
             return res.status(404).json({ message: 'Book not found' });
       }
       try {
+            // Find and delete the book by its id using Book.findByIdAndDelete()
             const bookToDelete = await Book.findByIdAndDelete(id);
+            // Check if the book was not found
             if (!bookToDelete) {
                   return res.status(404).json({ message: 'Book not Found' });
             }
@@ -129,36 +163,38 @@ async function deleteBook(req, res) {
 }
 
 async function rateBook(req, res) {
-      const id = req.params.id;
+      const id = req.params.bookId;
       const { userId, rating } = req.body;
 
       try {
-            if (rating < 0 || rating > 5) {
+            // Validate rating range
+            if (rating < 1 || rating > 5) {
                   return res.status(400).json({
                         message: 'Invalid rating. Rating must be between 1 and 5',
                   });
             }
-
+            // Find the book by its ID
             const book = await Book.findById(id);
-
+            // Check if the book exists
             if (!book) {
                   return res.status(404).json({ message: 'Book not found' });
             }
-
+            // Check if the user has already rated the book
             const existingRating = book.ratings.find(
                   (r) => r.userId === userId
             );
-
             if (existingRating) {
                   return res.status(400).json({
                         message: 'User has already rated this book',
                   });
             }
-
+            // Add the new rating to the book's ratings array
             book.ratings.push({ userId, grade: rating });
+            // Calculate the new average rating
             const totalRatings = book.ratings.length;
             const sumGrades = book.ratings.reduce((acc, r) => acc + r.grade, 0);
             book.averageRating = (sumGrades / totalRatings).toFixed(1);
+            // Save the updated book
             const updatedBook = await book.save();
 
             return res.status(200).json(updatedBook);
