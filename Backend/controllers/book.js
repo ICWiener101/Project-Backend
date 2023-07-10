@@ -1,4 +1,5 @@
 const Book = require('../models/Book');
+const fs = require('fs');
 
 async function getAllBooks(req, res) {
       try {
@@ -62,9 +63,20 @@ async function updateBook(req, res) {
             let imageUrl = book.imageUrl;
             // Check if a new image file is uploaded
             if (req.file) {
+                  // Delete the old image file
+                  const oldImagePath = book.imageUrl.split('/').pop(); // Extract the old image file name from the imageUrl
+                  fs.unlink(`images/${oldImagePath}`, (err) => {
+                        if (err) {
+                              console.error(
+                                    'Error deleting old image file:',
+                                    err
+                              );
+                        }
+                  });
                   const imagePath =
                         req.file.originalname.split('.')[0] + '.' + 'webp';
                   imageUrl = `http://localhost:4000/books/images/${imagePath}`;
+                  // Delete the associated image file
             }
             // Extract the book details from the request body
             const { title, author, year, genre } = req.body;
@@ -154,6 +166,13 @@ async function deleteBook(req, res) {
             if (!bookToDelete) {
                   return res.status(404).json({ message: 'Book not Found' });
             }
+            // Delete the associated image file
+            const imagePath = bookToDelete.imageUrl.split('/').pop(); // Extract the image file name from the imageUrl
+            fs.unlink(`images/${imagePath}`, (err) => {
+                  if (err) {
+                        console.error('Error deleting image file:', err);
+                  }
+            });
             return res
                   .status(200)
                   .json({ message: 'Book deleted successfully' });

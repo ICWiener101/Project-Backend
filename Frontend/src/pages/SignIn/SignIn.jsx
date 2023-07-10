@@ -64,7 +64,7 @@ function SignIn({ setUser }) {
       }
       setNotification({ error: false, message: 'Votre compte a bien été créé, vous pouvez vous connecter' });
     } catch (err) {
-      setNotification({ error: true, message: 'Email already exist' });
+      setNotification({ error: true, message: 'Email already exists' });
       console.log('Some error occured during signing up: ', err);
     } finally {
       setIsLoading(false);
