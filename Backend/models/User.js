@@ -1,4 +1,5 @@
 const { Schema, model } = require('mongoose');
+const uniqueValidator = require('mongoose-unique-validator');
 
 const userSchema = new Schema({
       email: {
@@ -16,10 +17,7 @@ const userSchema = new Schema({
       hashedPassword: { type: String, required: true },
 });
 
-userSchema.index({
-      unique: true,
-      collation: { locale: 'en', strength: 2 },
-});
+userSchema.plugin(uniqueValidator);
 
 const User = model('User', userSchema);
 

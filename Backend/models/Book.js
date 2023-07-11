@@ -4,11 +4,13 @@ const {
       Types: { ObjectId },
 } = require('mongoose');
 
+const uniqueValidator = require('mongoose-unique-validator');
+
 const currentYear = new Date().getFullYear;
 
 const bookSchema = new Schema({
-      userId: { type: ObjectId, ref: 'User', required: true },
-      title: { type: String, required: true },
+      userId: { type: ObjectId, ref: 'User', required: true, unique: true },
+      title: { type: String, required: true, unique: true },
       author: { type: String, required: true },
       imageUrl: { type: String, required: true },
       year: { type: Number, required: true, min: 0 },
@@ -34,6 +36,7 @@ bookSchema.path('year').validate(function (value) {
       return value <= currentYear;
 }, 'Invalid year.');
 
+bookSchema.plugin(uniqueValidator);
 const Book = model('Book', bookSchema);
 
 module.exports = Book;

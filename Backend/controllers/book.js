@@ -23,9 +23,11 @@ async function getOneBook(req, res) {
             return res.status(404).json({ error: error });
       }
 }
+
 async function addNewBook(req, res) {
       try {
             const book = JSON.parse(req.body.book);
+
             // Generating the image path based on the original file name
             const imagePath =
                   req.file.originalname.split('.')[0] + '.' + 'webp';
@@ -76,7 +78,6 @@ async function updateBook(req, res) {
                   const imagePath =
                         req.file.originalname.split('.')[0] + '.' + 'webp';
                   imageUrl = `http://localhost:4000/books/images/${imagePath}`;
-                  // Delete the associated image file
             }
             // Extract the book details from the request body
             const { title, author, year, genre } = req.body;
@@ -95,7 +96,7 @@ async function updateBook(req, res) {
                   bookId,
                   bookUpdate,
                   {
-                        new: true,
+                        new: true, // option in mongoose that returns the updated document as the result of findByIdAndUpdate()
                   }
             );
             // Check if the book document was not found
@@ -111,45 +112,45 @@ async function updateBook(req, res) {
 }
 
 async function bestRatedBooks(req, res) {
-      try {
-            const books = await Book.find({});
-            //Create an empty array to store the top-rated books
-            const topBooks = [];
-            // Create a set to keep track of visited books by their title
-            const visitedBooks = new Set();
-            2;
-            // Sort the books in descending order based on averageRating
-            const bestBooks = books.sort(function (a, b) {
-                  return b.averageRating - a.averageRating;
-            });
-
-            // Iterate through the sorted books and add them to the topBooks array
-            for (const book of bestBooks) {
-                  // Check if the book has not been visited yet
-                  if (!visitedBooks.has(book.title)) {
-                        topBooks.push(book);
-                        visitedBooks.add(book.title);
-                  }
-                  // Break the loop if the desired number of top books has been reached
-                  if (topBooks.length === 3) {
-                        break;
-                  }
-            }
-
-            return res.status(200).json(topBooks);
-      } catch (error) {
-            res.status(400).json({ error: error });
-      }
-      //server sorting version
       // try {
-      //       const topBooks = await Book.find({})
-      //             .sort({ averageRating: -1 })
-      //             .limit(3);
+      //       const books = await Book.find({});
+      //       //Create an empty array to store the top-rated books
+      //       const topBooks = [];
+      //       // Create a set to keep track of visited books by their title
+      //       const visitedBooks = new Set();
+      //       2;
+      //       // Sort the books in descending order based on averageRating
+      //       const bestBooks = books.sort(function (a, b) {
+      //             return b.averageRating - a.averageRating;
+      //       });
+
+      //       // Iterate through the sorted books and add them to the topBooks array
+      //       for (const book of bestBooks) {
+      //             // Check if the book has not been visited yet
+      //             if (!visitedBooks.has(book.title)) {
+      //                   topBooks.push(book);
+      //                   visitedBooks.add(book.title);
+      //             }
+      //             // Break the loop if the desired number of top books has been reached
+      //             if (topBooks.length === 3) {
+      //                   break;
+      //             }
+      //       }
 
       //       return res.status(200).json(topBooks);
       // } catch (error) {
       //       res.status(400).json({ error: error });
       // }
+      //server sorting version
+      try {
+            const topBooks = await Book.find({})
+                  .sort({ averageRating: -1 })
+                  .limit(3);
+
+            return res.status(200).json(topBooks);
+      } catch (error) {
+            res.status(400).json({ error: error });
+      }
 }
 
 async function deleteBook(req, res) {
@@ -184,7 +185,9 @@ async function deleteBook(req, res) {
 async function rateBook(req, res) {
       const id = req.params.bookId;
       const { userId, rating } = req.body;
-
+      if (userId !== req.auth.userId) {
+            return res.status(401).json({ message: 'Unauthorized access' });
+          }
       try {
             // Validate rating range
             if (rating < 1 || rating > 5) {
