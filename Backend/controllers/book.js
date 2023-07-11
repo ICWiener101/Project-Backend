@@ -44,7 +44,7 @@ async function addNewBook(req, res) {
                   userId: userId,
                   imageUrl: `http://localhost:4000/books/images/${imagePath}`,
             });
-
+            console.log('new book', newBook);
             await newBook.save();
             return res.status(201).json({ newBook });
       } catch (error) {
@@ -187,7 +187,7 @@ async function rateBook(req, res) {
       const { userId, rating } = req.body;
       if (userId !== req.auth.userId) {
             return res.status(401).json({ message: 'Unauthorized access' });
-          }
+      }
       try {
             // Validate rating range
             if (rating < 1 || rating > 5) {

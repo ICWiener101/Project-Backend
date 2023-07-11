@@ -12,7 +12,9 @@ const {
 } = require('../controllers/book');
 const { authenticateToken } = require('../middleware/auth');
 const { isOwner } = require('../middleware/guards');
-const { upload, resizeImage } = require('../middleware/multer-config');
+const { upload } = require('../middleware/multer');
+const { resizeImage } = require('../middleware/sharp');
+
 const Book = require('../models/Book');
 
 router.get('/', getAllBooks);

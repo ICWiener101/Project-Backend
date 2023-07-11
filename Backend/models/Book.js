@@ -9,15 +9,15 @@ const uniqueValidator = require('mongoose-unique-validator');
 const currentYear = new Date().getFullYear;
 
 const bookSchema = new Schema({
-      userId: { type: ObjectId, ref: 'User', required: true, unique: true },
-      title: { type: String, required: true, unique: true },
+      userId: { type: ObjectId, ref: 'User', required: true },
+      title: { type: String, required: true ,unique: true},
       author: { type: String, required: true },
       imageUrl: { type: String, required: true },
       year: { type: Number, required: true, min: 0 },
       genre: { type: String, required: true },
       ratings: [
             {
-                  userId: { type: ObjectId, ref: 'User', required: false },
+                  userId: { type: ObjectId, ref: 'User', required: true },
                   grade: { type: Number, required: false, min: 1, max: 5 },
             },
       ],
