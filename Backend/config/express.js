@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const helmet = require('helmet');
 
 module.exports = (app) => {
       // Middleware for parsing JSON request bodies
@@ -12,4 +13,5 @@ module.exports = (app) => {
                   'Access-Control-Allow-Origin': '*',
             })
       );
+      app.use(helmet());
 };

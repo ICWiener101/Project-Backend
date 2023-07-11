@@ -44,7 +44,6 @@ async function addNewBook(req, res) {
                   userId: userId,
                   imageUrl: `http://localhost:4000/books/images/${imagePath}`,
             });
-            console.log('new book', newBook);
             await newBook.save();
             return res.status(201).json({ newBook });
       } catch (error) {
