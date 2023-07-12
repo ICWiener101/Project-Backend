@@ -5,17 +5,17 @@ const booksRoutes = require('./routes/books');
 const userRoutes = require('./routes/users');
 const path = require('path');
 
-const app = express(); // Create an instance of the Express application
+const app = express(); // Create an Express app instance
 
-expressConfig(app); // Configure the Express application
+expressConfig(app); // Configure the Express app
 
 async function initializeServer() {
       try {
             await databaseConfig(app); // Connect to the database
 
-            app.use('/images', express.static(path.join(__dirname, 'images'))); // Serve static files from the 'images' directory
-            app.use('/api/books', booksRoutes); // Mount the routes for books
-            app.use('/api/auth', userRoutes); // Mount the routes for users
+            app.use('/books/images', express.static('images')); // Serve static files from the 'images' directory
+            app.use('/api/books', booksRoutes); // Mount the books routes
+            app.use('/api/auth', userRoutes); // Mount the user routes
       } catch (error) {
             console.error('Error initializing server:', error);
             process.exit(1); // Terminate the application if unable to connect to the database
@@ -27,5 +27,5 @@ initializeServer();
 const port = process.env.PORT || 4000; // Set the port number
 
 app.listen(port, () => {
-      console.log(`Server is running on port ${port}`); // Start the server and display the port it's listening on
+      console.log(`Server is running on port ${port}`);
 });

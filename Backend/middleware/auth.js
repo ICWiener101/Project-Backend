@@ -6,6 +6,7 @@ function authenticateToken(req, res, next) {
             // Extract the token from the 'authorization' header
             const authHeader = req.headers['authorization'];
             const token = authHeader && authHeader.split(' ')[1];
+
             // Verify the token using the secret key
             const decodedToken = jwt.verify(
                   token,

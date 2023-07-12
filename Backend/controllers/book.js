@@ -20,7 +20,7 @@ async function getOneBook(req, res) {
             }
             return res.status(200).json(book);
       } catch (error) {
-            return res.status(404).json({ error: error });
+            return res.status(404).json({ error: error.message });
       }
 }
 
@@ -44,10 +44,17 @@ async function addNewBook(req, res) {
                   userId: userId,
                   imageUrl: `http://localhost:4000/books/images/${imagePath}`,
             });
+            // Validate if the title is unique before saving the book
+            const existingBook = await Book.findOne({ title: newBook.title });
+            if (existingBook) {
+                  return res
+                        .status(400)
+                        .json({ message: 'Title must be unique' });
+            }
             await newBook.save();
             return res.status(201).json({ newBook });
       } catch (error) {
-            res.status(400).json({ error: error });
+            res.status(400).json({ message: error.message });
       }
 }
 
@@ -63,6 +70,7 @@ async function updateBook(req, res) {
             const book = await Book.findOne({ _id: bookId });
             let imageUrl = book.imageUrl;
             // Check if a new image file is uploaded
+            // Extract the book details from the request body
             if (req.file) {
                   // Delete the old image file
                   const oldImagePath = book.imageUrl.split('/').pop(); // Extract the old image file name from the imageUrl
@@ -78,8 +86,7 @@ async function updateBook(req, res) {
                         req.file.originalname.split('.')[0] + '.' + 'webp';
                   imageUrl = `http://localhost:4000/books/images/${imagePath}`;
             }
-            // Extract the book details from the request body
-            const { title, author, year, genre } = req.body;
+            const { title, author, year, genre } = JSON.parse(req.body.book);
             const bookUpdate = {
                   title,
                   author,
@@ -96,17 +103,18 @@ async function updateBook(req, res) {
                   bookUpdate,
                   {
                         new: true, // option in mongoose that returns the updated document as the result of findByIdAndUpdate()
+                        runValidators: true, // enable running validators during the update
                   }
             );
             // Check if the book document was not found
             if (!updatedBook) {
-                  return res.status(404).json({ error: 'Book not found' });
+                  return res.status(404).json({ message: 'Book not found' });
             }
             // Return the updated book document as the response
             return res.status(200).json(updatedBook);
       } catch (error) {
             // Handle any errors that occurred during the update process
-            res.status(500).json({ error: error });
+            res.status(500).json({ message: error.message });
       }
 }
 

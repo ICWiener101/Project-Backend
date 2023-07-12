@@ -40,7 +40,7 @@ function SignIn({ setUser }) {
       }
     } catch (err) {
       console.log(err);
-      setNotification({ error: true, message: 'Wrong email or password' });
+      setNotification({ error: true, message: err.response.data.message });
       console.log('Some error occured during signing in: ', err);
     } finally {
       setIsLoading(false);
@@ -64,7 +64,7 @@ function SignIn({ setUser }) {
       }
       setNotification({ error: false, message: 'Votre compte a bien été créé, vous pouvez vous connecter' });
     } catch (err) {
-      setNotification({ error: true, message: 'Email already exists' });
+      setNotification({ error: true, message: err.response.data.message });
       console.log('Some error occured during signing up: ', err);
     } finally {
       setIsLoading(false);

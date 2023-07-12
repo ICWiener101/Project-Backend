@@ -142,7 +142,7 @@ export async function addBook(data) {
     });
   } catch (err) {
     console.error(err);
-    return { error: true, message: err.message };
+    return { error: true, message: err.response.data.message };
   }
 }
 
@@ -178,6 +178,6 @@ export async function updateBook(data, id) {
     return newBook;
   } catch (err) {
     console.error(err);
-    return { error: true, message: err.message };
+    return { error: true, message: err.response.data.message };
   }
 }

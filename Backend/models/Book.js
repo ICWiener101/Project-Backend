@@ -18,7 +18,7 @@ const bookSchema = new Schema({
       ratings: [
             {
                   userId: { type: ObjectId, ref: 'User', required: true },
-                  grade: { type: Number, required: false, min: 1, max: 5 },
+                  grade: { type: Number, required: false, min: 0, max: 5 },
             },
       ],
       averageRating: { type: Number, required: true },

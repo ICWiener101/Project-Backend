@@ -24,12 +24,13 @@ async function register(req, res) {
                   email,
                   hashedPassword,
             });
+
             // Save the user to the database
             await user.save();
             // Return a 201 Created response with the user object
             return res.status(201).json(user);
       } catch (error) {
-            res.status(500).json({ message: 'Error registering user' });
+            res.status(500).json({ message: error.message });
       }
 }
 
@@ -69,9 +70,9 @@ function generateToken(user) {
             userId: user._id.toString(),
       };
       // Sign the payload with a secret key to generate the token
-      // expiresIn specifies the token expiration time (1 day in this case)
+      // expiresIn specifies the token expiration time
       return jwt.sign(payload, process.env.ACCESS_TOKEN_SECRET, {
-            expiresIn: '1d',
+            expiresIn: '1h',
       });
 }
 

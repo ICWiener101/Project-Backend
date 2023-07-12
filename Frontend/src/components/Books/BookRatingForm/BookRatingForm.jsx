@@ -30,7 +30,7 @@ function BookRatingForm({
     if (!connectedUser || !auth) {
       navigate(APP_ROUTES.SIGN_IN);
     }
-    if (userId && rating === 0) {
+    if (connectedUser && rating === 0) {
       alert('Please select a rating before submitting.');
       return;
     }
